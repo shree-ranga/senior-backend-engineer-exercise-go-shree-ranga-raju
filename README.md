@@ -42,7 +42,7 @@ Example job data:
 
 ## Success
 
-- We can run the API and ingest data base on your setup instructions
+- We can run the API and ingest database on your setup instructions
 - The API is written in Python or Go
 
 ## Not Required
@@ -60,8 +60,8 @@ Example job data:
 ## Notes
 
 - Keep it simple
-- If the API does what we requested, then its a success
+- If the API does what we requested, then it's a success
 - Anything extra (tests, other endpoints, ...) is not worth bonus/etc
-- We expect this to take less than an two hours, please try and limit your effort to that window
+- We expect this to take less than two hours, please try and limit your effort to that window
 - We truly value your time and just want a basic benchmark and common piece of code to use in future interviews
 - If we bring you in for in-person interviews, your submission might be revisited and built on during the interview process
