@@ -79,7 +79,7 @@ sh run.sh
 
 ```bash
 export SYNDIO_PORT=5000 #make sure it's the same port from step 1
-curl -X POST http://127.0.0.1:${SYNDIO_PORT}/jobs \
+curl -X POST http://127.0.0.1:${SYNDIO_PORT}/employments \
      -H "Content-Type: application/json" \
      -d '[
          { "id": 1, "department": "Engineering", "job_title": "Senior Engineer" },
