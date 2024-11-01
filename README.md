@@ -1,67 +1,145 @@
-# Syndio Backend App
+# Syndio Backend App Solution
 
-Using the `employees.db` sqlite database in this repository with the following table/data:
+### Pre-requisites
+
+- macOS Monterey or later
+- Go version 1.23
+- golang-migrate
+
+### Folder Structure
+
+```bash
+senior-backend-engineer-exercise-go-shree-ranga-raju
+├── README.md
+├── appContext
+│   └── appContext.go
+├── contracts
+│   └── contract.go
+├── db
+│   └── migrations
+│       ├── 000001_create_jobs.down.sql
+│       ├── 000001_create_jobs.up.sql
+│       ├── 000002_create_employment.down.sql
+│       ├── 000002_create_employment.up.sql
+│       └── migrate.go
+├── domains
+│   └── domain.go
+├── employees.db
+├── go.mod
+├── go.sum
+├── handlers
+│   └── handler.go
+├── main.go
+├── repo
+│   └── repo.go
+├── router
+│   └── router.go
+├── run.sh
+├── services
+│   ├── dependencies.go
+│   └── service.go
+├── test.db
+└── views
+    └── view.go
+
+11 directories, 21 files
+```
+
+### Project setup
+
+1. Open a terminal and clone the repository
+
+```bash
+git clone https://github.com/shree-ranga/senior-backend-engineer-exercise-go-shree-ranga-raju.git
+```
+
+2. Navivgate to the project directory
+
+```bash
+cd senior-backend-engineer-exercise-go-shree-ranga-raju
+```
+
+### Migrations
+
+Using a [standalone migration tool](https://github.com/golang-migrate/migrate) to manage migrations.
+With this tool, need to create the migration files manually.
+
+#### Setup
 
 ```
+brew install golang-migrate
+```
+
+#### Create Migration files
+
+To create migration files manually, run the below command in the project dir.
+
+```sh
+migrate create -ext sql -dir ./db/migrations -seq [MIGRATION_NAME]
+# -ext sql: Specifies that the migration file extension should be .sql.
+# -dir ./migrations: Specifies the target directory for migration files.
+# -seq: Creates the migration with a sequential number (e.g., 000001_sample.up.sql and 000001_sample.down.sql).
+```
+
+This command will create `.up.sql`, `.down.sql` files in the `migrations` dir.
+
+#### Add SQL into Migration file
+
+Add your SQL statements directly into the `.up.sql` file (and corresponding rollback statements in `.down.sql`) in the `db/migrations` directory.
+
+### Database Schema
+
+Added two new tables:
+
+1. `jobs`
+2. `employment`
+3. `schema_migrations` (added by golang-migrate)
+   <br><br>
+   `employees.db` new schema as follows:
+
+```bash
 sqlite> .open employees.db
-sqlite> .schema employees
+sqlite> .schema
 CREATE TABLE employees (id INTEGER PRIMARY KEY, gender TEXT not null);
-sqlite> SELECT * FROM employees;
-1|male
-2|male
-3|male
-4|female
-5|female
-6|female
-7|non-binary
+CREATE TABLE schema_migrations (version uint64,dirty bool);
+CREATE UNIQUE INDEX version_unique ON schema_migrations (version);
+CREATE TABLE employment (
+    id INTEGER PRIMARY KEY,
+    employee_id INTEGER NOT NULL,
+    job_id INTEGER NOT NULL
+);
+CREATE TABLE jobs (    id INTEGER PRIMARY KEY,    department TEXT NOT NULL,    job_title TEXT UNIQUE NOT NULL);
 ```
 
-Create an API endpoint that saves job data for the corresponding employees.
+### Run Server
 
-Example job data:
+1. Set the desired server port:
 
-```json
-[
-  { "id": 1, "department": "Engineering", "job_title": "Senior Enginer" },
-  { "id": 2, "department": "Engineering", "job_title": "Super Senior Enginer" },
-  { "id": 3, "department": "Sales", "job_title": "Head of Sales"},
-  { "id": 4, "department": "Support", "job_title": "Tech Support" },
-  { "id": 5, "department": "Engineering", "job_title": "Junior Enginer" },
-  { "id": 6, "department": "Sales", "job_title": "Sales Rep" },
-  { "id": 7, "department": "Marketing", "job_title": "Senior Marketer" }
-]
+```bash
+export SYNDIO_PORT=5000 #replace with your desired port number
 ```
 
-## Requirements
+2. Start the server:
 
-- The API must take an environment variable `PORT` and respond to requests on that port.
-- You provide:
-  - Basic setup instructions required to run the API
-  - Guide on how to ingest the data through the endpoint
-  - A way to update the existing database given to you
+```bash
+go mod tidy
+sh run.sh
+```
 
-## Success
+3. Curl <br>
+   Open up a new terminal window
 
-- We can run the API and ingest database on your setup instructions
-- The API is written in Python or Go
-
-## Not Required
-
-- Tests
-- Logging, monitoring, or anything more than basic error handling
-
-## Submission
-
-- Respond to the email you received giving you this with:
-  - a zip file, or link to a git repo
-  - instructions on how to setup and run the code (could be included w/ zip/git)
-- We'll follow the instructions to test it on a local machine, then we'll get back to you
-
-## Notes
-
-- Keep it simple
-- If the API does what we requested, then it's a success
-- Anything extra (tests, other endpoints, ...) is not worth bonus/etc
-- We expect this to take less than two hours, please try and limit your effort to that window
-- We truly value your time and just want a basic benchmark and common piece of code to use in future interviews
-- If we bring you in for in-person interviews, your submission might be revisited and built on during the interview process
+```bash
+export SYNDIO_PORT=5000 #make sure it's the same port from step 1
+curl -X POST http://127.0.0.1:${SYNDIO_PORT}/jobs \
+     -H "Content-Type: application/json" \
+     -d '[
+         { "id": 1, "department": "Engineering", "job_title": "Senior Engineer" },
+         { "id": 2, "department": "Engineering", "job_title": "Super Senior Engineer" },
+         { "id": 3, "department": "Sales", "job_title": "Head of Sales" },
+         { "id": 4, "department": "Support", "job_title": "Tech Support" },
+         { "id": 5, "department": "Engineering", "job_title": "Junior Engineer" },
+         { "id": 6, "department": "Sales", "job_title": "Sales Rep" },
+         { "id": 7, "department": "Marketing", "job_title": "Senior Marketer" }
+     ]'
+```
