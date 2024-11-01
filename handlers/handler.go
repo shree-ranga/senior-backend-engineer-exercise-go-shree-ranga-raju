@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 	"syndio/contracts"
 	"syndio/services"
@@ -20,7 +21,8 @@ func CreateEmployments(service services.SyndioService) http.HandlerFunc {
 		}
 
 		if err := service.CreateEmployments(ctx, req); err != nil {
-			http.Error(w, "Something went wrong", http.StatusInternalServerError)
+			log.Printf("Error creating employment records: %v", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 

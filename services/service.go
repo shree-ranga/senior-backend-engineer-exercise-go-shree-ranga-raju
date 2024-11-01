@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"strings"
 	"syndio/contracts"
@@ -28,6 +29,8 @@ func (s *syndioService) CreateEmployments(ctx context.Context, jobs []contracts.
 		return nil
 	}
 
+	var failedJobs []contracts.EmploymentContract
+
 	for _, job := range jobs {
 		// Normalize department and job title
 		department := strings.ToLower(job.Department)
@@ -41,6 +44,7 @@ func (s *syndioService) CreateEmployments(ctx context.Context, jobs []contracts.
 		jobId, err := s.repo.GetOrCreateJob(jobModel)
 		if err != nil {
 			log.Printf("Failed to insert job %v: %v\n", job, err)
+			failedJobs = append(failedJobs, job)
 			continue // skip creating employment for this job and continue
 		}
 
@@ -50,8 +54,13 @@ func (s *syndioService) CreateEmployments(ctx context.Context, jobs []contracts.
 			JobId:      jobId,
 		}
 		if err := s.repo.CreateEmployment(employmentModel); err != nil {
+			failedJobs = append(failedJobs, job)
 			log.Printf("Failed to create employment for job %v: %v\n", job, err)
 		}
+	}
+
+	if len(failedJobs) > 0 {
+		return fmt.Errorf("failed to create employment records for %d job(s): %v", len(failedJobs), failedJobs)
 	}
 
 	return nil
